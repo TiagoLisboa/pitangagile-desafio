@@ -2,7 +2,7 @@ from desafio.core.models import User
 from rest_framework import viewsets, permissions, generics
 from desafio.core.serializers import UserSerializer
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserView(generics.RetrieveAPIView):
     """
     API endpoint that allows users to be viewed or edited.
     """
