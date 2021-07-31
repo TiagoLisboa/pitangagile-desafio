@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from desafio.core import views
 
@@ -7,5 +7,6 @@ from desafio.core import views
 urlpatterns = [
     path('refresh/', TokenRefreshView.as_view(), name='refresh'),
     path('signup/', views.SignupView.as_view(), name='signup'),
+    path('signin/', views.SigninView.as_view(), name='signin'),
     path('me/', views.UserView.as_view(), name='me')
 ]
