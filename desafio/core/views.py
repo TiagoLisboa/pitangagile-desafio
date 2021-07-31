@@ -3,6 +3,7 @@ from rest_framework import permissions, generics, status
 from rest_framework.response import responses
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from desafio.core.models import User
 from desafio.core.serializers import UserSerializer, SigninSerializer
@@ -33,7 +34,7 @@ class SignupView(generics.CreateAPIView):
         self.perform_create(serializer)
         token = RefreshToken.for_user(serializer.instance)
 
-        return Response( {
+        return Response({
             'token': str(token.access_token),
         }, status.HTTP_201_CREATED)
 
@@ -43,3 +44,16 @@ class SigninView(TokenObtainPairView):
     API endpoint that allows users to signin.
     """
     serializer_class = SigninSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+
+        token = serializer.validated_data
+        return Response({
+            'token': str(token['access']),
+        }, status=status.HTTP_200_OK)
