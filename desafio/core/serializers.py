@@ -20,7 +20,10 @@ class UserSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         phones_data = validated_data.pop('phones')
-        user = User.objects.create(**validated_data)
+        password = validated_data.pop('password')
+        user = super().create(validated_data)
+        user.set_password(password)
+        user.save()
         phones = [Phone(user=user, **phone) for phone in phones_data]
         phones = Phone.objects.bulk_create(phones)
         return user
