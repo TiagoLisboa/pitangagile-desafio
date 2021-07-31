@@ -3,6 +3,8 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.utils.translation import ugettext_lazy as _
 
+from desafio.users.managers import UserManager
+
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)
     firstName = models.EmailField(_('first name'), max_length=30)
@@ -12,6 +14,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['firstName', 'lastName']
 
+    objects = UserManager()
 
     class Meta:
         verbose_name = _('user')
