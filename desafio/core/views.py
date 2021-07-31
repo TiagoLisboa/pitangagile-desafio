@@ -6,17 +6,14 @@ from desafio.core.serializers import UserSerializer
 
 class UserView(generics.RetrieveAPIView):
     """
-    API endpoint that allows users to be viewed or edited.
+    API endpoint that allows users to be viewed.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = (permissions.IsAuthenticated,)
 
-    def get(self, request):
-        user = request.user
-
-        return Response(UserSerializer(user).data)
-
+    def get_object(self):
+        return self.request.user
 
 
 class SignupView(generics.CreateAPIView):
