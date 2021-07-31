@@ -1,5 +1,7 @@
-from .models import Phone, User
 from rest_framework import serializers
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from .models import Phone, User
 
 
 class PhoneSerializer(serializers.ModelSerializer):
@@ -15,4 +17,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['firstName', 'lastName', 'email', 'phones', 'created_at', 'last_login', 'password']
         read_only_fields = ['created_at', 'last_login']
         extra_kwargs = {'password': {'write_only': True}}
+
+
+class SigninSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token =  super().get_token(user)
+
+        token['email'] = user.email
+        return token
 
