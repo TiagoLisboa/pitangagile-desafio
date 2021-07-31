@@ -1,6 +1,8 @@
 from rest_framework.response import Response
-from rest_framework import permissions, generics
+from rest_framework import permissions, generics, status
+from rest_framework.response import responses
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from desafio.core.models import User
 from desafio.core.serializers import UserSerializer, SigninSerializer
@@ -24,6 +26,17 @@ class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_class = (permissions.AllowAny,)
     serializer_class = UserSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        token = RefreshToken.for_user(serializer.instance)
+
+        return Response( {
+            'token': str(token.access_token),
+        }, status.HTTP_201_CREATED)
+
 
 class SigninView(TokenObtainPairView):
     """
