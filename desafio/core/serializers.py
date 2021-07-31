@@ -1,5 +1,3 @@
-from django.conf import settings
-
 from .models import Phone, User
 from rest_framework import serializers
 
@@ -7,7 +5,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['firstName', 'lastName', 'email', 'phones', 'created_at', 'last_login', 'password']
-        read_only_fields = ['created_at', 'last_update']
+        read_only_fields = ['created_at', 'last_login']
         extra_kwargs = {'password': {'write_only': True}}
 
 
