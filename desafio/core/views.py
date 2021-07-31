@@ -1,8 +1,9 @@
 from rest_framework.response import Response
 from rest_framework import permissions, generics
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 from desafio.core.models import User
-from desafio.core.serializers import UserSerializer
+from desafio.core.serializers import UserSerializer, SigninSerializer
 
 class UserView(generics.RetrieveAPIView):
     """
@@ -23,3 +24,9 @@ class SignupView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_class = (permissions.AllowAny,)
     serializer_class = UserSerializer
+
+class SigninView(TokenObtainPairView):
+    """
+    API endpoint that allows users to signin.
+    """
+    serializer_class = SigninSerializer
