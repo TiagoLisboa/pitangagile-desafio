@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.base_user import AbstractBaseUser
 from django.utils.translation import ugettext_lazy as _
+from django.conf import settings
 
 from desafio.core.managers import UserManager
 
@@ -39,7 +40,7 @@ class Phone(models.Model):
     area_code = models.IntegerField(_('area code'))
     country_code = models.CharField(_('country code'), max_length=4)
 
-    user =  models.ForeignKey(User, on_delete=models.CASCADE, related_name='phones')
+    user =  models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='phones')
 
     class Meta:
         verbose_name = _('phone')
