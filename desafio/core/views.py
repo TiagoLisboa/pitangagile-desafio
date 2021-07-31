@@ -1,5 +1,7 @@
+from rest_framework.response import Response
+from rest_framework import permissions, generics
+
 from desafio.core.models import User
-from rest_framework import viewsets, permissions, generics
 from desafio.core.serializers import UserSerializer
 
 class UserView(generics.RetrieveAPIView):
@@ -9,6 +11,12 @@ class UserView(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+
+        return Response(UserSerializer(user).data)
+
 
 
 class SignupView(generics.CreateAPIView):
