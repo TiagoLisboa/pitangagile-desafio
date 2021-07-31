@@ -11,6 +11,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     lastName = models.EmailField(_('last name'), max_length=30)
     is_active = models.BooleanField(_('active'), default=True)
 
+
+
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['firstName', 'lastName']
 
@@ -32,3 +34,14 @@ class User(AbstractBaseUser, PermissionsMixin):
         Returns the short name for the user.
         '''
         return self.firstName
+
+class Phone(models.Model):
+    number = models.BigIntegerField(_('number'))
+    area_code = models.IntegerField(_('area code'))
+    country_code = models.CharField(_('country code'), max_length=4)
+
+    user =  models.ForeignKey(User, on_delete=models.CASCADE, related_name='phones')
+
+    class Meta:
+        verbose_name = _('phone')
+        verbose_name_plural = _('phones')
