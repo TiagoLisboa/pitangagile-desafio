@@ -7,11 +7,9 @@ from desafio.core.managers import UserManager
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(_('email address'), unique=True)
-    firstName = models.EmailField(_('first name'), max_length=30)
-    lastName = models.EmailField(_('last name'), max_length=30)
+    firstName = models.CharField(_('first name'), max_length=30)
+    lastName = models.CharField(_('last name'), max_length=30)
     is_active = models.BooleanField(_('active'), default=True)
-
-
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['firstName', 'lastName']
