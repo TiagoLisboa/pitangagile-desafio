@@ -22,12 +22,18 @@ class UserSerializerTest(TestCase):
             ]
         }
         serializer = UserSerializer(data=data)
+
         is_valid = serializer.is_valid(raise_exception=True)
         self.assertTrue(is_valid)
-        user = serializer.save()
+
+        with mock.patch('desafio.core.serializers.update_last_login') as mock_update_last_login:
+            user = serializer.save()
+        mock_update_last_login.assert_called()
+
         self.assertIsInstance(user, User)
         self.assertTrue(user.check_password('secret'))
         self.assertEquals(user.phones.count(), 1)
+
         for phone in user.phones.all():
             self.assertIsInstance(phone, Phone)
             self.assertDictContainsSubset(
