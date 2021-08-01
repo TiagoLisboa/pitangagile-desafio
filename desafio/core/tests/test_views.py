@@ -63,3 +63,11 @@ class SignupViewTest(TestCase):
         }
         with self.assertRaises(MissingFieldsException):
             view.unpack_validation_errors(validation_error_detail)
+
+    def test_unpack_validation_errors_invalid(self):
+        view = SignupView()
+        validation_error_detail = {
+            'email': [ErrorDetail('test', 'invalid')]
+        }
+        with self.assertRaises(InvalidFieldsException):
+            view.unpack_validation_errors(validation_error_detail)
