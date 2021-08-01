@@ -39,10 +39,13 @@ class SignupView(generics.CreateAPIView):
 
         try:
             serializer.is_valid(raise_exception=True)
-        except AuthenticationFailed as e:
-            raise InvalidFieldsException()
         except serializers.ValidationError as e:
-            raise MissingFieldsException()
+            for error in e.detail:
+                for errorDetail in e.detail[error]:
+                    if errorDetail.code == 'required':
+                        raise MissingFieldsException()
+            raise InvalidFieldsException()
+
         self.perform_create(serializer)
         token = RefreshToken.for_user(serializer.instance)
 
