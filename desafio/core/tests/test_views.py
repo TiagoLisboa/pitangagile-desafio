@@ -1,7 +1,7 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ErrorDetail
-from rest_framework import status
+from rest_framework import status, serializers
 from unittest import mock
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -101,3 +101,24 @@ class SignupViewTest(TestCase):
                     self.assertEquals(resp.data, { 'token': 'token_string'})
                     serializer.is_valid.assert_called()
                     perform_create.assert_called()
+
+    def test_create_validation_error(self):
+        view = SignupView()
+        request = RequestFactory().get('/signup')
+        request.data = {
+            'firstName': 'John',
+            'lastName': 'Doe',
+            'email': 'johndoe@email.com',
+            'password': 'secret',
+            'phones': []
+        }
+        with mock.patch('desafio.core.views.SignupView.get_serializer') as get_serializer:
+            with mock.patch('desafio.core.views.SignupView.unpack_validation_errors') as unpack_validation_errors:
+                serializer = mock.Mock()
+                serializer.is_valid = mock.Mock(side_effect=serializers.ValidationError)
+                get_serializer.return_value = serializer
+
+                resp = view.create(request)
+
+                serializer.is_valid.assert_called()
+                unpack_validation_errors.assert_called()
