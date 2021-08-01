@@ -1,11 +1,11 @@
 from django.test import TestCase
 
-from ..serializers import UserSerializer
+from ..serializers import UserSerializer, SigninSerializer
 from ..models import Phone, User
 
 
 class UserSerializerTest(TestCase):
-    """ Test Module for User serializer """
+    """ Test Module for UserSerializer """
 
     def setUp(self) -> None:
         return super().setUp()
@@ -35,3 +35,14 @@ class UserSerializerTest(TestCase):
             )
 
 
+class SigninSerializerTest(TestCase):
+    """ Test Module for SigninSerializer """
+
+    def setUp(self) -> None:
+        self.user = User.objects.create(firstName="John", lastName="Doe", email="johndoe@email.com", password="secret")
+        return super().setUp()
+
+    def test_signin_serializer_get_token(self):
+        serializer = SigninSerializer(self.user)
+        token = serializer.get_token(self.user)
+        self.assertEquals(token['email'], self.user.email)
