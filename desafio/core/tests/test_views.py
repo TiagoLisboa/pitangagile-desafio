@@ -31,5 +31,15 @@ class UserViewTest(TestCase):
         })
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
+    def test_handle_exception_authentication_failed(self):
+        view = UserView()
+        response = view.handle_exception(AuthenticationFailed())
+
+        self.assertEquals(response.data, {
+            'message': 'Unauthorized - invalid session',
+            'errorCode': status.HTTP_401_UNAUTHORIZED,
+        })
+        self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
 
 
