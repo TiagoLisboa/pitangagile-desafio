@@ -2,6 +2,9 @@ from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
 from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ErrorDetail
 from rest_framework import status
+from unittest import mock
+
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from ..views import UserView, SignupView
 from ..exceptions import EmailAlreadyExistsException, InvalidFieldsException, MissingFieldsException
@@ -71,3 +74,30 @@ class SignupViewTest(TestCase):
         }
         with self.assertRaises(InvalidFieldsException):
             view.unpack_validation_errors(validation_error_detail)
+
+    def test_create(self):
+        view = SignupView()
+        request = RequestFactory().get('/signup')
+        request.data = {
+            'firstName': 'John',
+            'lastName': 'Doe',
+            'email': 'johndoe@email.com',
+            'password': 'secret',
+            'phones': []
+        }
+        with mock.patch('desafio.core.views.SignupView.get_serializer') as get_serializer:
+            with mock.patch('desafio.core.views.SignupView.perform_create') as perform_create:
+                with mock.patch('desafio.core.views.RefreshToken') as refresh_token:
+                    serializer = mock.Mock()
+                    serializer.is_valid = mock.Mock(return_value=True)
+                    get_serializer.return_value = serializer
+
+                    token = mock.MagicMock()
+                    token.access_token = 'token_string'
+                    refresh_token.for_user = mock.Mock(return_value=token)
+
+                    resp = view.create(request)
+
+                    self.assertEquals(resp.data, { 'token': 'token_string'})
+                    serializer.is_valid.assert_called()
+                    perform_create.assert_called()
