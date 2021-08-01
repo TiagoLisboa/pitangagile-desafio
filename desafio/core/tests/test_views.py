@@ -146,3 +146,20 @@ class SigninViewTest(TestCase):
                 view.post(request=request)
 
             serializer.is_valid.assert_called()
+
+    def test_post_authentication_failed_error(self):
+        view = SigninView()
+        request = RequestFactory().get('/signin')
+        request.data = {
+            'email': 'johndoe@email.com',
+            'password': 'secret',
+        }
+        with mock.patch('desafio.core.views.SigninView.get_serializer') as get_serializer:
+            serializer = mock.Mock()
+            serializer.is_valid = mock.Mock(side_effect=AuthenticationFailed)
+            get_serializer.return_value = serializer
+
+            with self.assertRaises(InvalidFieldsException):
+                view.post(request=request)
+
+            serializer.is_valid.assert_called()
