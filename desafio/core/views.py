@@ -1,12 +1,13 @@
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
-from rest_framework import permissions, generics, status
-from rest_framework.response import responses
+from rest_framework import permissions, generics, status, serializers
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from desafio.core.models import User
 from desafio.core.serializers import UserSerializer, SigninSerializer
+from desafio.core.exceptions import EmailAlreadyExistsException, InvalidFieldsException, MissingFieldsException
 
 class UserView(generics.RetrieveAPIView):
     """
@@ -30,7 +31,18 @@ class SignupView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+
+        email = request.data['email']
+        user_exists = User.objects.filter(email=email).exists()
+        if user_exists:
+            raise EmailAlreadyExistsException()
+
+        try:
+            serializer.is_valid(raise_exception=True)
+        except AuthenticationFailed as e:
+            raise InvalidFieldsException()
+        except serializers.ValidationError as e:
+            raise MissingFieldsException()
         self.perform_create(serializer)
         token = RefreshToken.for_user(serializer.instance)
 
@@ -52,6 +64,10 @@ class SigninView(TokenObtainPairView):
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0])
+        except AuthenticationFailed as e:
+            raise InvalidFieldsException('Invalid e-mail or password')
+        except serializers.ValidationError as e:
+            raise MissingFieldsException()
 
         token = serializer.validated_data
         return Response({
