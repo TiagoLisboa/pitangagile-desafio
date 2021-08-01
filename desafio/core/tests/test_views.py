@@ -1,9 +1,9 @@
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase, RequestFactory
-from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, ErrorDetail
 from rest_framework import status
 
-from ..views import UserView
+from ..views import UserView, SignupView
 from ..exceptions import EmailAlreadyExistsException, InvalidFieldsException, MissingFieldsException
 
 class UserViewTest(TestCase):
@@ -42,4 +42,16 @@ class UserViewTest(TestCase):
         self.assertEquals(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
+class SignupViewTest(TestCase):
+    """ Test module for SignupView """
 
+    def setUp(self):
+        pass
+
+    def test_unpack_validation_errors_email_unique(self):
+        view = SignupView()
+        validation_error_detail = {
+            'email': [ErrorDetail('test', 'unique')]
+        }
+        with self.assertRaises(EmailAlreadyExistsException):
+            view.unpack_validation_errors(validation_error_detail)
