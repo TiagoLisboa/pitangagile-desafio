@@ -6,7 +6,7 @@ from unittest import mock
 
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from ..views import UserView, SignupView
+from ..views import SigninView, UserView, SignupView
 from ..exceptions import EmailAlreadyExistsException, InvalidFieldsException, MissingFieldsException
 
 class UserViewTest(TestCase):
@@ -122,3 +122,27 @@ class SignupViewTest(TestCase):
 
                 serializer.is_valid.assert_called()
                 unpack_validation_errors.assert_called()
+
+
+class SigninViewTest(TestCase):
+    """ Test module for SigninView """
+
+    def setUp(self):
+        pass
+
+    def test_post_validation_error(self):
+        view = SigninView()
+        request = RequestFactory().get('/signin')
+        request.data = {
+            'email': 'johndoe@email.com',
+            'password': 'secret',
+        }
+        with mock.patch('desafio.core.views.SigninView.get_serializer') as get_serializer:
+            serializer = mock.Mock()
+            serializer.is_valid = mock.Mock(side_effect=serializers.ValidationError)
+            get_serializer.return_value = serializer
+
+            with self.assertRaises(MissingFieldsException):
+                view.post(request=request)
+
+            serializer.is_valid.assert_called()
