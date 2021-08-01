@@ -52,6 +52,8 @@ class SignupView(generics.CreateAPIView):
                 if isinstance(errorDetail, dict):
                     self.unpack_validation_errors(errorDetail)
                 else:
+                    if error == 'email' and errorDetail.code == 'unique':
+                        raise EmailAlreadyExistsException()
                     if errorDetail.code == 'required':
                         raise MissingFieldsException()
         raise InvalidFieldsException()
@@ -59,11 +61,6 @@ class SignupView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
-        email = request.data['email']
-        user_exists = User.objects.filter(email=email).exists()
-        if user_exists:
-            raise EmailAlreadyExistsException()
 
         try:
             serializer.is_valid(raise_exception=True)
