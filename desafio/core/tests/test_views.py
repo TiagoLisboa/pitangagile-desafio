@@ -55,3 +55,11 @@ class SignupViewTest(TestCase):
         }
         with self.assertRaises(EmailAlreadyExistsException):
             view.unpack_validation_errors(validation_error_detail)
+
+    def test_unpack_validation_errors_required(self):
+        view = SignupView()
+        validation_error_detail = {
+            'email': [ErrorDetail('test', 'required')]
+        }
+        with self.assertRaises(MissingFieldsException):
+            view.unpack_validation_errors(validation_error_detail)
