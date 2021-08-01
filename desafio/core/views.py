@@ -1,6 +1,7 @@
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework import permissions, generics, status, serializers
+from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
@@ -19,6 +20,22 @@ class UserView(generics.RetrieveAPIView):
 
     def get_object(self):
         return self.request.user
+
+    def handle_exception(self, exc):
+        if isinstance(exc, NotAuthenticated):
+            return Response({
+                'message': 'Unauthorized',
+                'errorCode': exc.status_code,
+            }, exc.status_code)
+
+        if isinstance(exc, AuthenticationFailed):
+            return Response({
+                'message': 'Unauthorized - invalid session',
+                'errorCode': exc.status_code,
+            }, exc.status_code)
+
+
+        return super().handle_exception(exc)
 
 
 class SignupView(generics.CreateAPIView):
