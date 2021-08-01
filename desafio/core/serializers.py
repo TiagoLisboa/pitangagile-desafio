@@ -25,6 +25,8 @@ class UserSerializer(serializers.ModelSerializer):
         user = super().create(validated_data)
         user.set_password(password)
         user.save()
+
+        update_last_login(None, user)
         phones = [Phone(user=user, **phone) for phone in phones_data]
         phones = Phone.objects.bulk_create(phones)
         return user
