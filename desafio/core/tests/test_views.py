@@ -163,3 +163,22 @@ class SigninViewTest(TestCase):
                 view.post(request=request)
 
             serializer.is_valid.assert_called()
+
+    def test_post(self):
+        view = SigninView()
+        request = RequestFactory().get('/signin')
+        request.data = {
+            'email': 'johndoe@email.com',
+            'password': 'secret',
+        }
+        with mock.patch('desafio.core.views.SigninView.get_serializer') as get_serializer:
+            serializer = mock.Mock()
+            serializer.is_valid = mock.Mock(return_value=True)
+            serializer.validated_data = {'access': 'token_string'}
+            get_serializer.return_value = serializer
+
+            resp = view.post(request)
+
+            self.assertEquals(resp.data, { 'token': 'token_string'})
+            serializer.is_valid.assert_called()
+
