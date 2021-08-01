@@ -4,8 +4,6 @@ from rest_framework.exceptions import AuthenticationFailed, NotAuthenticated, Er
 from rest_framework import status, serializers
 from unittest import mock
 
-from rest_framework_simplejwt.tokens import RefreshToken
-
 from ..views import SigninView, UserView, SignupView
 from ..exceptions import EmailAlreadyExistsException, InvalidFieldsException, MissingFieldsException
 
@@ -99,6 +97,7 @@ class SignupViewTest(TestCase):
                     resp = view.create(request)
 
                     self.assertEquals(resp.data, { 'token': 'token_string'})
+                    self.assertEquals(resp.status_code, status.HTTP_200_OK)
                     serializer.is_valid.assert_called()
                     perform_create.assert_called()
 
@@ -180,5 +179,6 @@ class SigninViewTest(TestCase):
             resp = view.post(request)
 
             self.assertEquals(resp.data, { 'token': 'token_string'})
+            self.assertEquals(resp.status_code, status.HTTP_200_OK)
             serializer.is_valid.assert_called()
 
