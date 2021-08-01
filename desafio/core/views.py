@@ -46,6 +46,17 @@ class SignupView(generics.CreateAPIView):
     permission_class = (permissions.AllowAny,)
     serializer_class = UserSerializer
 
+    def unpack_validation_errors(self, validation_error_detail):
+        for error in validation_error_detail:
+            for errorDetail in validation_error_detail[error]:
+                if isinstance(errorDetail, dict):
+                    self.unpack_validation_errors(errorDetail)
+                else:
+                    if errorDetail.code == 'required':
+                        raise MissingFieldsException()
+        raise InvalidFieldsException()
+
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
 
@@ -57,11 +68,7 @@ class SignupView(generics.CreateAPIView):
         try:
             serializer.is_valid(raise_exception=True)
         except serializers.ValidationError as e:
-            for error in e.detail:
-                for errorDetail in e.detail[error]:
-                    if errorDetail.code == 'required':
-                        raise MissingFieldsException()
-            raise InvalidFieldsException()
+            self.unpack_validation_errors(e.detail)
 
         self.perform_create(serializer)
         token = RefreshToken.for_user(serializer.instance)
